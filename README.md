@@ -24,7 +24,7 @@ Byggt av DG Gruppen för att hantera dokumentation, åtkomstkontroller och ändr
 ### 1. Klona projektet
 ```bash
 git clone https://github.com/dggruppen/Dokumentationssystem.git
-cd Dokumentationssystem/laravel-version
+cd Dokumentationssystem/
 ```
 
 ### 2. Installera beroenden
