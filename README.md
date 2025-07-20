@@ -19,6 +19,139 @@ Byggt av DG Gruppen för att hantera dokumentation, åtkomstkontroller och ändr
 
 ---
 
+
+
+
+### 1. Klona projektet
+```bash
+git clone https://github.com/dggruppen/Dokumentationssystem.git
+cd Dokumentationssystem/
+```
+
+### 2. Installera beroenden
+```bash
+composer install
+npm install && npm run build
+```
+
+### 3. Kopiera miljöfil och generera nyckel
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+### 4. Migrera databasen
+```bash
+php artisan migrate
+```
+
+---
+
+## 📬 SMTP-inställningar
+
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=mailcluster.loopia.se
+MAIL_PORT=587
+MAIL_USERNAME=dokument@scantomail.se
+MAIL_PASSWORD=${SMTP_PASSWORD}
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=dokument@scantomail.se
+MAIL_FROM_NAME="Dokumentationssystem"
+```
+
+🔐 **Viktigt:** Ange SMTP-lösenordet som en miljövariabel istället för att spara det i `.env`-filen.
+
+### Exempel på hur du sätter miljövariabeln:
+
+**Linux/macOS (ex. `.bashrc`, `.zshrc`):**
+```bash
+export SMTP_PASSWORD="DittSäkraLösenord2025!"
+```
+
+**Ubuntu server globalt:**
+```bash
+sudo nano /etc/environment
+SMTP_PASSWORD="DittSäkraLösenord2025!"
+```
+
+**GitHub Actions eller CI/CD:**
+Lägg till `SMTP_PASSWORD` som en "Repository Secret".
+
+
+## ⚙️ Köhantering (queue)
+
+### Skapa tabeller för kö:
+```bash
+php artisan queue:table
+php artisan migrate
+```
+
+### Starta kö lokalt:
+```bash
+php artisan queue:work
+```
+
+### Systemd-tjänst:
+```bash
+sudo cp /var/www/dokumentation/laravel-queue-worker.service /etc/systemd/system/
+sudo systemctl daemon-reexec
+sudo systemctl enable laravel-queue-worker
+sudo systemctl start laravel-queue-worker
+```
+
+---
+
+## 📌 Notifieringssystem
+
+- Dashboard visar notifieringar via `unreadNotifications`
+- Ikon i navbar med 🔴 räknare
+- Markera som läst med knapp
+
+---
+
+## 📄 Exempel på notifieringar
+
+- Nytt ändringsförslag
+- Förslag godkänt
+- Återställning av lösenord
+- Kommentar eller dokumentuppdatering
+
+---
+
+## 🧱 Mappstruktur (kort)
+
+```
+app/
+├── Http/Controllers/
+├── Models/
+├── Notifications/
+resources/views/
+├── dashboard.blade.php
+├── layouts/app.blade.php
+routes/web.php
+public/index.php
+artisan
+.env.example
+composer.json
+```
+
+---
+
+## 👥 Roller & Behörigheter
+
+- **Admin** – full åtkomst, skapande, granskning
+- **Tekniker** – teknisk dokumentation och hantering
+- **View Only** – kan läsa + skicka ändringsförslag
+
+---
+
+## 📞 Support
+
+By DG Gruppen  
+📧 info@dggruppen.se  
+🌐 https://dggruppen.se
+
 ## 🛠️ Installation
 
 <details>
@@ -209,134 +342,3 @@ Skapa admin-användare via seed eller registrering om det är öppet.
 ```
 
 </details>
-
-
-### 1. Klona projektet
-```bash
-git clone https://github.com/dggruppen/Dokumentationssystem.git
-cd Dokumentationssystem/
-```
-
-### 2. Installera beroenden
-```bash
-composer install
-npm install && npm run build
-```
-
-### 3. Kopiera miljöfil och generera nyckel
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-### 4. Migrera databasen
-```bash
-php artisan migrate
-```
-
----
-
-## 📬 SMTP-inställningar
-
-```env
-MAIL_MAILER=smtp
-MAIL_HOST=mailcluster.loopia.se
-MAIL_PORT=587
-MAIL_USERNAME=dokument@scantomail.se
-MAIL_PASSWORD=${SMTP_PASSWORD}
-MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS=dokument@scantomail.se
-MAIL_FROM_NAME="Dokumentationssystem"
-```
-
-🔐 **Viktigt:** Ange SMTP-lösenordet som en miljövariabel istället för att spara det i `.env`-filen.
-
-### Exempel på hur du sätter miljövariabeln:
-
-**Linux/macOS (ex. `.bashrc`, `.zshrc`):**
-```bash
-export SMTP_PASSWORD="DittSäkraLösenord2025!"
-```
-
-**Ubuntu server globalt:**
-```bash
-sudo nano /etc/environment
-SMTP_PASSWORD="DittSäkraLösenord2025!"
-```
-
-**GitHub Actions eller CI/CD:**
-Lägg till `SMTP_PASSWORD` som en "Repository Secret".
-
-
-## ⚙️ Köhantering (queue)
-
-### Skapa tabeller för kö:
-```bash
-php artisan queue:table
-php artisan migrate
-```
-
-### Starta kö lokalt:
-```bash
-php artisan queue:work
-```
-
-### Systemd-tjänst:
-```bash
-sudo cp /var/www/dokumentation/laravel-queue-worker.service /etc/systemd/system/
-sudo systemctl daemon-reexec
-sudo systemctl enable laravel-queue-worker
-sudo systemctl start laravel-queue-worker
-```
-
----
-
-## 📌 Notifieringssystem
-
-- Dashboard visar notifieringar via `unreadNotifications`
-- Ikon i navbar med 🔴 räknare
-- Markera som läst med knapp
-
----
-
-## 📄 Exempel på notifieringar
-
-- Nytt ändringsförslag
-- Förslag godkänt
-- Återställning av lösenord
-- Kommentar eller dokumentuppdatering
-
----
-
-## 🧱 Mappstruktur (kort)
-
-```
-app/
-├── Http/Controllers/
-├── Models/
-├── Notifications/
-resources/views/
-├── dashboard.blade.php
-├── layouts/app.blade.php
-routes/web.php
-public/index.php
-artisan
-.env.example
-composer.json
-```
-
----
-
-## 👥 Roller & Behörigheter
-
-- **Admin** – full åtkomst, skapande, granskning
-- **Tekniker** – teknisk dokumentation och hantering
-- **View Only** – kan läsa + skicka ändringsförslag
-
----
-
-## 📞 Support
-
-By DG Gruppen  
-📧 info@dggruppen.se  
-🌐 https://dggruppen.se  
