@@ -1,82 +1,219 @@
 # 🗂️ Dokumentationssystem för IT-miljöer – DG Gruppen
 
-Detta system är utvecklat i Laravel och syftar till att digitalt dokumentera kunders IT-miljöer, servrar, system, konton, nätverk, licenser m.m.  
-Byggt av DG Gruppen för att hantera dokumentation, åtkomstkontroller och ändringsförslag på ett säkert och effektivt sätt.
+Laravel-baserat system för att dokumentera och administrera kunders IT-miljö, servrar, konton, nätverk, licenser och mycket mer.
 
 ---
 
-## 🛠 Funktioner
+## ✅ Funktioner
 
-- ✅ Inloggning med roller: **Administratör**, **Tekniker**, **View Only**
-- ✅ Dokumentationsstruktur per kund
-- ✅ Behörighetsstyrning per bolag
-- ✅ 🔔 Notifieringar via **mail** och **dashboard**
-- ✅ 📨 Stöd för ändringsförslag som skickas till tekniker/admin
-- ✅ 💌 SMTP-konfig via Loopia
-- ✅ 🧩 Queue support (köhantering för e-post)
-- ✅ 🛎️ Navbar med notifieringsikon och mark-as-read
-- ✅ ⚙️ Färdig systemd-tjänst för queue-worker
+- Inloggning med roller: **Admin**, **Tekniker**, **View Only**
+- Dokumentstruktur per kund
+- Roller + företagskoppling
+- 🔔 Notifieringssystem (dashboard + mail)
+- 📬 Ändringsförslag & granskningsflöde
+- 🧾 PDF-export av dokument eller hela kundrapporter
+- 📊 Statistikpanel (dokument, användare, ändringar)
+- 📜 Dokumenthistorik (versioner + återställ)
+- 🛠 Admin: slå av/på moduler
+- 🔒 Backupmodul (manuell + schemalagd)
+- ☁️ Lagring till Google Drive, Dropbox, OneDrive, FTP/SFTP
 
 ---
 
-## 🚀 Installation
+## 📄 Dokumentstruktur
 
-### 1. Klona projektet
-```bash
-git clone https://github.com/dggruppen/Dokumentationssystem.git
-cd Dokumentationssystem/
+```
+/app
+  └── Models, Controllers, Notifications, Policies
+/resources/views
+  └── dashboard, admin/, documents/
+/routes/web.php
+/public/index.php
 ```
 
-### 2. Installera beroenden
+---
+
+## 🧩 Backupfunktioner
+
+- Manuella backuper via adminpanelen
+- Automatiska backuper med valbar frekvens
+- Krypterade zip-backuper av databasen + viktiga filer
+- Stöd för:
+  - Google Drive
+  - Dropbox
+  - OneDrive
+  - FTP/SFTP
+- Inställningar styrs från adminpanelen:
+  - Mål
+  - Intervall
+  - Max antal sparade versioner
+
+---
+
+## 🧠 Behörighet och säkerhet
+
+- Alla moduler skyddas av policy (admin-only där det krävs)
+- `.env` styr hemligheter
+- Systemd-tjänst för queue + backup schemaläggning
+
+---
+
+## 🛠️ Fullständig installation
+
+<details>
+  <summary>Klicka här för fullständig installationsguide (Ubuntu VPS + backupfunktioner)</summary>
+
+```
+# 🚀 Installationsanvisningar – Laravel Dokumentationssystem (Ubuntu VPS)
+
+Detta dokument beskriver hur du installerar och driftsätter dokumentationssystemet på en ny VPS med Ubuntu 22.04 eller senare.
+
+---
+
+## 🧱 1. Förberedelser
+
+### Uppdatera systemet
 ```bash
-composer install
-npm install && npm run build
+sudo apt update && sudo apt upgrade -y
 ```
 
-### 3. Kopiera miljöfil och generera nyckel
+### Installera nödvändiga paket
+```bash
+sudo apt install -y nginx php php-mysql php-mbstring php-xml php-bcmath php-curl php-zip php-cli php-common php-tokenizer unzip curl git mariadb-server
+```
+
+---
+
+## 🐘 2. Installera Composer
+
+```bash
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+composer --version
+```
+
+---
+
+## 🗃️ 3. Klona projektet
+
+```bash
+cd /var/www
+sudo git clone https://github.com/dggruppen/Dokumentationssystem.git
+cd Dokumentationssystem
+sudo chown -R www-data:www-data .
+```
+
+---
+
+## ⚙️ 4. Konfigurera Laravel
+
 ```bash
 cp .env.example .env
+composer install
 php artisan key:generate
-```
-
-### 4. Migrera databasen
-```bash
 php artisan migrate
 ```
 
 ---
 
-## 📬 SMTP-inställningar
+## 🌐 5. Nginx-konfiguration
 
-```env
-MAIL_MAILER=smtp
-MAIL_HOST=mailcluster.loopia.se
-MAIL_PORT=587
-MAIL_USERNAME=dokument@scantomail.se
-MAIL_PASSWORD=BroSto2018!
-MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS=dokument@scantomail.se
-MAIL_FROM_NAME="Dokumentationssystem"
+Skapa fil:
+```bash
+sudo nano /etc/nginx/sites-available/dokumentation
+```
+
+Innehåll:
+```nginx
+server {
+    listen 80;
+    server_name example.com;
+
+    root /var/www/Dokumentationssystem/public;
+    index index.php index.html;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+```
+
+```bash
+sudo ln -s /etc/nginx/sites-available/dokumentation /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
 ---
 
-## ⚙️ Köhantering (queue)
+## 🔐 6. Databasinställningar
 
-### Skapa tabeller för kö:
+Logga in:
+```bash
+sudo mariadb
+```
+
+Skapa användare och databas:
+```sql
+CREATE DATABASE dokumentation;
+CREATE USER 'dokadmin'@'localhost' IDENTIFIED BY 'ValfrittLösenord';
+GRANT ALL PRIVILEGES ON dokumentation.* TO 'dokadmin'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+Uppdatera `.env`:
+```env
+DB_DATABASE=dokumentation
+DB_USERNAME=dokadmin
+DB_PASSWORD=ValfrittLösenord
+```
+
+---
+
+## 📬 7. Mailinställning
+
+SMTP-lösenord bör läggas som miljövariabel:
+```bash
+export SMTP_PASSWORD="hemligtlösen"
+```
+
+---
+
+## 🔁 8. Queue & background-tjänst
+
 ```bash
 php artisan queue:table
 php artisan migrate
 ```
 
-### Starta kö lokalt:
-```bash
-php artisan queue:work
+Systemd-tjänst:
+```ini
+[Unit]
+Description=Laravel Queue Worker
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+Restart=always
+ExecStart=/usr/bin/php /var/www/Dokumentationssystem/artisan queue:work --sleep=3 --tries=3
+
+[Install]
+WantedBy=multi-user.target
 ```
 
-### Systemd-tjänst:
+Spara som:
 ```bash
-sudo cp /var/www/dokumentation/laravel-queue-worker.service /etc/systemd/system/
+sudo nano /etc/systemd/system/laravel-queue-worker.service
 sudo systemctl daemon-reexec
 sudo systemctl enable laravel-queue-worker
 sudo systemctl start laravel-queue-worker
@@ -84,52 +221,29 @@ sudo systemctl start laravel-queue-worker
 
 ---
 
-## 📌 Notifieringssystem
+## ✅ Klart!
 
-- Dashboard visar notifieringar via `unreadNotifications`
-- Ikon i navbar med 🔴 räknare
-- Markera som läst med knapp
-
----
-
-## 📄 Exempel på notifieringar
-
-- Nytt ändringsförslag
-- Förslag godkänt
-- Återställning av lösenord
-- Kommentar eller dokumentuppdatering
-
----
-
-## 🧱 Mappstruktur (kort)
+Du kan nu logga in och börja använda systemet på:
 
 ```
-app/
-├── Http/Controllers/
-├── Models/
-├── Notifications/
-resources/views/
-├── dashboard.blade.php
-├── layouts/app.blade.php
-routes/web.php
-public/index.php
-artisan
-.env.example
-composer.json
+http://[din-server-ip]/
 ```
 
----
-
-## 👥 Roller & Behörigheter
-
-- **Admin** – full åtkomst, skapande, granskning
-- **Tekniker** – teknisk dokumentation och hantering
-- **View Only** – kan läsa + skicka ändringsförslag
+Skapa admin-användare via seed eller registrering om det är öppet.
 
 ---
 
-## 📞 Support
+## 🛡️ Tips för produktion
 
-By DG Gruppen  
-📧 info@dggruppen.se  
-🌐 https://dggruppen.se  
+- Använd SSL (Let's Encrypt + certbot)
+- `APP_ENV=production` och `APP_DEBUG=false` i `.env`
+- Sätt upp daglig backup av databasen
+- Övervaka `queue:work` med systemd-loggar: `journalctl -u laravel-queue-worker`
+
+---
+
+📧 Support: [info@dggruppen.se](mailto:info@dggruppen.se)
+🌐 https://dggruppen.se
+```
+
+</details>
