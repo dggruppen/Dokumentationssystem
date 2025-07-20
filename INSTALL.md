@@ -178,3 +178,58 @@ Skapa admin-användare via seed eller registrering om det är öppet.
 
 📧 Support: [info@dggruppen.se](mailto:info@dggruppen.se)
 🌐 https://dggruppen.se
+
+---
+
+## ☁️ Backup till Google Drive / Dropbox / FTP / OneDrive
+
+Systemet använder Laravel Filesystem för att koppla mot fjärrlagring. Stödda alternativ:
+
+### 1. Google Drive
+- Skapa ett Google servicekonto (eller OAuth-applikation)
+- Lägg till JSON eller token i `.env`:
+
+```env
+GOOGLE_DRIVE_CLIENT_ID=
+GOOGLE_DRIVE_CLIENT_SECRET=
+GOOGLE_DRIVE_REFRESH_TOKEN=
+GOOGLE_DRIVE_FOLDER=
+```
+
+### 2. FTP/SFTP
+
+```env
+BACKUP_DISK=ftp
+FTP_HOST=ftp.example.com
+FTP_USERNAME=ftp_user
+FTP_PASSWORD=ftp_pass
+```
+
+### 3. Dropbox
+
+```env
+DROPBOX_TOKEN=your_dropbox_token
+```
+
+### 4. OneDrive
+
+```env
+ONEDRIVE_CLIENT_ID=
+ONEDRIVE_CLIENT_SECRET=
+ONEDRIVE_REFRESH_TOKEN=
+ONEDRIVE_FOLDER=
+```
+
+---
+
+## 🔄 Automatiska backuper
+
+Automatiska backuper körs via Laravel Scheduler.
+
+**Exempel på crontab:**
+
+```bash
+* * * * * cd /var/www/html && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Inställning för intervall och max versioner sker via adminpanelen.
