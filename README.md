@@ -1,136 +1,135 @@
-# 📚 Dokumentationssystem för IT-miljöer
+# 🗂️ Dokumentationssystem för IT-miljöer – DG Gruppen
 
-Detta är ett komplett digitalt dokumentationssystem utvecklat i **Laravel**. Det är framtaget av **DG Gruppen** för att strukturera, lagra och hantera information om våra kunders IT-miljöer – på ett säkert, flexibelt och framtidssäkert sätt.
-
----
-
-## ✨ Funktioner
-
-- ✅ **Inloggning med 2FA** (tvåfaktorsautentisering)
-- ✅ **Rollbaserat behörighetssystem**
-  - Administratör
-  - Tekniker
-  - View-only med förslagsrätt
-- ✅ **Koppling av användare till företag**
-- ✅ **Företagsspecifik dokumentation**
-- ✅ **Förslagsflöde:** View-only-användare kan lämna förslag för granskning
-- ✅ **Modulhantering för olika typer av data**
-  - Infrastruktur
-  - Servrar & nätverk
-  - Användare
-  - Mjukvara
-  - Backup & säkerhet
-- ✅ **Notifieringar för ändringar och granskning**
-- ✅ **Toggla funktioner via adminvy**
-- ✅ **Versionering och ändringshistorik**
-- ✅ **Loggning, revisionsspårning och säkerhetspolicyer**
+Detta system är utvecklat i Laravel och syftar till att digitalt dokumentera kunders IT-miljöer, servrar, system, konton, nätverk, licenser m.m.  
+Byggt av DG Gruppen för att hantera dokumentation, åtkomstkontroller och ändringsförslag på ett säkert och effektivt sätt.
 
 ---
 
-## 🧱 Teknisk uppsättning
+## 🛠 Funktioner
 
-- Laravel 10+
-- PHP 8.2+
-- MariaDB
-- Composer, NPM, Vite
-- Ubuntu 22.04 LTS (rekommenderad driftmiljö)
-- Valfri VPS eller molntjänst (t.ex. DigitalOcean + Laravel Forge)
+- ✅ Inloggning med roller: **Administratör**, **Tekniker**, **View Only**
+- ✅ Dokumentationsstruktur per kund
+- ✅ Behörighetsstyrning per bolag
+- ✅ 🔔 Notifieringar via **mail** och **dashboard**
+- ✅ 📨 Stöd för ändringsförslag som skickas till tekniker/admin
+- ✅ 💌 SMTP-konfig via Loopia
+- ✅ 🧩 Queue support (köhantering för e-post)
+- ✅ 🛎️ Navbar med notifieringsikon och mark-as-read
+- ✅ ⚙️ Färdig systemd-tjänst för queue-worker
 
 ---
 
-## 🚀 Installation (på server)
+## 🚀 Installation
 
+### 1. Klona projektet
 ```bash
-# Klona projektet
 git clone https://github.com/dggruppen/Dokumentationssystem.git
 cd Dokumentationssystem/laravel-version
+```
 
-# Installera beroenden
+### 2. Installera beroenden
+```bash
 composer install
 npm install && npm run build
+```
 
-# Konfigurera .env
+### 3. Kopiera miljöfil och generera nyckel
+```bash
 cp .env.example .env
 php artisan key:generate
+```
 
-# Sätt rätt databasuppgifter i .env
-php artisan migrate --seed
-
-# Rättigheter
-chown -R www-data:www-data .
-chmod -R 775 storage bootstrap/cache
-
-# Aktivera queue och scheduler (exempel)
-php artisan queue:work &
+### 4. Migrera databasen
+```bash
+php artisan migrate
 ```
 
 ---
 
-## 🖥️ Exempel på systemarkitektur
+## 📬 SMTP-inställningar
 
-```
-┌────────────────────────┐
-│   Laravel + MariaDB    │
-│   + Tailwind / Vite    │
-└────────────┬───────────┘
-             │
-   ┌─────────▼─────────┐
-   │  Dokumenttyper    │
-   │  Modulhantering   │
-   └─────────┬─────────┘
-             │
-   ┌─────────▼─────────┐
-   │  Användare & Roller│
-   └─────────┬─────────┘
-             │
-     Granskningsflöde
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=mailcluster.loopia.se
+MAIL_PORT=587
+MAIL_USERNAME=dokument@scantomail.se
+MAIL_PASSWORD=BroSto2018!
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS=dokument@scantomail.se
+MAIL_FROM_NAME="Dokumentationssystem"
 ```
 
 ---
 
-## 📂 Projektstruktur (kort)
+## ⚙️ Köhantering (queue)
 
-```
-laravel-version/
-├── app/
-│   ├── Models/
-│   └── Http/Controllers/
-├── resources/views/
-├── routes/web.php
-├── public/
-├── .env.example
-└── README.md
+### Skapa tabeller för kö:
+```bash
+php artisan queue:table
+php artisan migrate
 ```
 
----
+### Starta kö lokalt:
+```bash
+php artisan queue:work
+```
 
-## 🔐 Säkerhet och dataskydd
-
-Systemet följer DG Gruppens interna informationssäkerhetspolicys. All data är krypterad i transit (SSL), och känslig information lagras enligt branschstandard.
-
----
-
-## 🛠 Vidareutveckling
-
-Under planering:
-
-- ✅ API-stöd för externa integrationer
-- ✅ Mobilanpassad PWA
-- ✅ Dokumentationsgenerator (PDF/export)
-- ✅ Loggcentral för felsökning
-- ✅ Docker & CI/CD-stöd (valfritt)
+### Systemd-tjänst:
+```bash
+sudo cp /var/www/dokumentation/laravel-queue-worker.service /etc/systemd/system/
+sudo systemctl daemon-reexec
+sudo systemctl enable laravel-queue-worker
+sudo systemctl start laravel-queue-worker
+```
 
 ---
 
-## 🤝 Bidra / Feedback
+## 📌 Notifieringssystem
 
-Detta är ett internt system men vi tar gärna emot **idéer, buggrapporter och förbättringsförslag** via GitHub Issues eller direkt till:
-
-📧 toni.kazarian@dggruppen.se  
-🌐 [dggruppen.se](https://dggruppen.se)
+- Dashboard visar notifieringar via `unreadNotifications`
+- Ikon i navbar med 🔴 räknare
+- Markera som läst med knapp
 
 ---
 
-## 📄 Licens
+## 📄 Exempel på notifieringar
 
-© DG Gruppen – internt dokumentationssystem. Ej för publikt bruk utan tillstånd.
+- Nytt ändringsförslag
+- Förslag godkänt
+- Återställning av lösenord
+- Kommentar eller dokumentuppdatering
+
+---
+
+## 🧱 Mappstruktur (kort)
+
+```
+app/
+├── Http/Controllers/
+├── Models/
+├── Notifications/
+resources/views/
+├── dashboard.blade.php
+├── layouts/app.blade.php
+routes/web.php
+public/index.php
+artisan
+.env.example
+composer.json
+```
+
+---
+
+## 👥 Roller & Behörigheter
+
+- **Admin** – full åtkomst, skapande, granskning
+- **Tekniker** – teknisk dokumentation och hantering
+- **View Only** – kan läsa + skicka ändringsförslag
+
+---
+
+## 📞 Support
+
+By DG Gruppen  
+📧 info@dggruppen.se  
+🌐 https://dggruppen.se  
