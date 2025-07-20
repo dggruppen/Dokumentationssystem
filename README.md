@@ -148,5 +148,5 @@ composer.json
 ## 📞 Support
 
 By DG Gruppen  
-📧 info@dggruppen.se  
+📧 helpdesk@dggruppen.se  
 🌐 https://dggruppen.se  
