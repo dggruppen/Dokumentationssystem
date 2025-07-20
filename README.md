@@ -53,13 +53,30 @@ MAIL_MAILER=smtp
 MAIL_HOST=mailcluster.loopia.se
 MAIL_PORT=587
 MAIL_USERNAME=dokument@scantomail.se
-MAIL_PASSWORD=BroSto2018!
+MAIL_PASSWORD=${SMTP_PASSWORD}
 MAIL_ENCRYPTION=null
 MAIL_FROM_ADDRESS=dokument@scantomail.se
 MAIL_FROM_NAME="Dokumentationssystem"
 ```
 
----
+🔐 **Viktigt:** Ange SMTP-lösenordet som en miljövariabel istället för att spara det i `.env`-filen.
+
+### Exempel på hur du sätter miljövariabeln:
+
+**Linux/macOS (ex. `.bashrc`, `.zshrc`):**
+```bash
+export SMTP_PASSWORD="DittSäkraLösenord2025!"
+```
+
+**Ubuntu server globalt:**
+```bash
+sudo nano /etc/environment
+SMTP_PASSWORD="DittSäkraLösenord2025!"
+```
+
+**GitHub Actions eller CI/CD:**
+Lägg till `SMTP_PASSWORD` som en "Repository Secret".
+
 
 ## ⚙️ Köhantering (queue)
 
