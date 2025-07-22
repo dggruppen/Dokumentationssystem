@@ -1,6 +1,15 @@
-use App\Notifications\ResetPasswordNotification;
+<?php
 
-public function sendPasswordResetNotification($token)
+namespace App\Models;
+
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
 {
-    $this->notify(new ResetPasswordNotification($token));
+    use Notifiable;
+
+    protected $fillable = [
+        'name', 'email', 'password', 'role', 'company_id'
+    ];
 }
