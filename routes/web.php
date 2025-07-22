@@ -1,13 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
 
-Route::get('/dashboard', [App\Http\Controllers\HomeController::class, 'index'])->middleware('auth');
+Route::get('/', function () {
+    return view('dashboard');
+});
 
-Route::post('/notifications/read/{id}', function ($id) {
-    $notification = auth()->user()->notifications()->findOrFail($id);
-    $notification->markAsRead();
-    return back();
-})->middleware('auth');
+// Lägg till fler rutter här för dokument, backup, statistik etc.
